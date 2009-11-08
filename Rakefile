@@ -16,15 +16,15 @@ e = Echoe.new('RedCloth', RedCloth::VERSION.to_s) do |p|
   p.ruby_version = '>=1.8.4'
   p.extension_pattern = nil
   p.development_dependencies = [] # remove echoe from development dependencies
-  
-  if Platform.gcc?
+
+#  if Platform.gcc?
     p.platform = 'x86-mswin32-60'
-  elsif Platform.java?
-    p.platform = 'universal-java'
-  elsif RUBY_PLATFORM == 'pureruby'
-    p.platform = 'ruby'
-  end
-  
+#  elsif Platform.java?
+#    p.platform = 'universal-java'
+#  elsif RUBY_PLATFORM == 'pureruby'
+#    p.platform = 'ruby'
+#  end
+
   if RUBY_PLATFORM =~ /mingw|mswin|java/
     p.need_tar_gz = false
   elsif RUBY_PLATFORM == 'pureruby'
@@ -46,7 +46,7 @@ e = Echoe.new('RedCloth', RedCloth::VERSION.to_s) do |p|
     else
       self.files += %w[attributes inline scan].map {|f| "ext/redcloth_scan/redcloth_#{f}.c"}
     end
-    
+
     self.require_paths << "lib/case_sensitive_require"
   end
 
@@ -72,7 +72,7 @@ ext = "ext/redcloth_scan"
 
 case RUBY_PLATFORM
 when /mingw/
-  
+
   filename = "lib/redcloth_scan.so"
   file filename => FileList["#{ext}/redcloth_scan.c", "#{ext}/redcloth_inline.c", "#{ext}/redcloth_attributes.c"] do
     cp "ext/mingw-rbconfig.rb", "#{ext}/rbconfig.rb"
@@ -93,15 +93,15 @@ when /java/
     sh "jar cf lib/redcloth_scan.jar -C #{ext} ."
     move_extensions
   end
-  
+
 when /pureruby/
   filename = "lib/redcloth_scan.rb"
   file filename => FileList["#{ext}/redcloth_scan.rb", "#{ext}/redcloth_inline.rb", "#{ext}/redcloth_attributes.rb"] do |task|
-    
+
     sources = task.prerequisites.join(' ')
     sh "cat #{sources} > #{filename}"
   end
-  
+
 else
   filename = "#{ext}/redcloth_scan.#{Config::CONFIG['DLEXT']}"
   file filename => FileList["#{ext}/redcloth_scan.c", "#{ext}/redcloth_inline.c", "#{ext}/redcloth_attributes.c"]
@@ -189,17 +189,17 @@ desc "Find the fastest code generation style for Ragel"
 task :optimize do
   require 'test/ragel_profiler'
   results = []
-  
+
   RAGEL_CODE_GENERATION_STYLES.each do |style, name|
     @code_style = style
     profiler = RagelProfiler.new(style + " " + name)
-    
-    # Hack to get everything to invoke again.  Could use #execute, but then it 
+
+    # Hack to get everything to invoke again.  Could use #execute, but then it
     # doesn't execute prerequisites the second+ time
     Rake::Task.tasks.each {|t| t.instance_eval "@already_invoked = false" }
-    
+
     Rake::Task['clobber'].invoke
-    
+
     profiler.measure(:compile) do
       Rake::Task['compile'].invoke
     end
@@ -207,7 +207,7 @@ task :optimize do
       Rake::Task['test'].invoke
     end
     profiler.ext_size(filename)
-    
+
   end
   puts RagelProfiler.results
 end
@@ -215,13 +215,13 @@ end
 
 #### Custom testing tasks
 
-require 'rubygems' 
+require 'rubygems'
 require 'spec/rake/spectask'
 Rake::Task[:default].prerequisites.clear
 Spec::Rake::SpecTask.new do |t|
-  t.spec_opts = ["--options #{File.dirname(__FILE__) + '/spec/spec.opts'}"] 
-  t.spec_files = FileList['spec/**/*_spec.rb'] 
-end 
+  t.spec_opts = ["--options #{File.dirname(__FILE__) + '/spec/spec.opts'}"]
+  t.spec_files = FileList['spec/**/*_spec.rb']
+end
 
 task :default => :spec
 task :spec => [:ensure_diff_lcs, :compile]
@@ -253,3 +253,4 @@ def ensure_ragel_version(name)
     exit(1)
   end
 end
+

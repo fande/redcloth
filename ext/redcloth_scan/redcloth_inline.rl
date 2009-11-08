@@ -12,13 +12,13 @@
   empty_tag_noactions = "<" Name space+ AttrSet* (AttrEnd)? "/>" | "<" Name "/>" ;
   end_tag_noactions = "</" Name space* ">" ;
   any_tag_noactions = ( start_tag_noactions | empty_tag_noactions | end_tag_noactions ) ;
-  
+
   start_tag = start_tag_noactions >X >A %T ;
   empty_tag = empty_tag_noactions >X >A %T ;
   end_tag = end_tag_noactions >X >A %T ;
   html_comment = ("<!--" (default+) :>> "-->") >X >A %T;
   html_break = ("<br" space* AttrSet* (AttrEnd)? "/"? ">" LF?) >X >A %T ;
-  
+
   # links
   link_text_char = (default - [ "<>]) ;
   link_text_char_or_tag = ( link_text_char | any_tag_noactions ) ;
@@ -65,7 +65,7 @@
   cite = "["? "??" >X mtext >A >ATTR :>> ("?" @T ( "?" | "?" @{ STORE_ATTR("text"); } "?" %SET_ATTR ))  "]"? ;
   ignore = "["? "==" >X %A mtext %T :> "==" "]"? ;
   snip = "["? "```" >X %A mtext %T :> "```" "]"? ;
-  
+
   # quotes
   quote1 = "'" >X %A mtext %T :> "'" ;
   non_quote_chars_or_link = (chars -- '"') | link_noquotes_noactions ;
@@ -73,7 +73,7 @@
   html_tag_up_to_attribute_quote = "<" Name space+ NameAttr space* "=" space* ;
   quote2 = ('"' >X %A ( mtext_inside_quotes - (mtext_inside_quotes html_tag_up_to_attribute_quote ) ) %T :> '"' ) ;
   multi_paragraph_quote = (('"' when starts_line) >X  %A ( chars -- '"' ) %T );
-  
+
   # glyphs
   ellipsis = ( " "? >A %T "..." ) >X ;
   emdash = "--" ;
@@ -93,7 +93,7 @@
   cee = [Cc] ;
   copyright = ( "[" cee "]" | "(" cee ")" ) ;
   entity = ( "&" %A ( '#' digit+ | ( alpha ( alpha | digit )+ ) ) %T ';' ) >X ;
-  
+
   # info
   redcloth_version = "[RedCloth::VERSION]" ;
 
@@ -105,20 +105,20 @@
   *|;
 
   main := |*
-    
+
     image { PARSE_IMAGE_ATTR("src"); INLINE(block, "image"); };
     bracketed_image { PARSE_IMAGE_ATTR("src"); INLINE(block, "image"); };
-    
+
     link { PARSE_LINK_ATTR("name"); PASS(block, "name", "link"); };
     bracketed_link { PARSE_LINK_ATTR("name"); PASS(block, "name", "link"); };
-    
-    code { PASS_CODE(block, "text", "code"); };
-    code_tag_start { CAT(block); fgoto code_tag; };
+
+    // code { PASS_CODE(block, "text", "code"); };
+    // code_tag_start { CAT(block); fgoto code_tag; };
     notextile { INLINE(block, "notextile"); };
     strong { PARSE_ATTR("text"); PASS(block, "text", "strong"); };
     b { PARSE_ATTR("text"); PASS(block, "text", "b"); };
     em { PARSE_ATTR("text"); PASS(block, "text", "em"); };
-    i { PARSE_ATTR("text"); PASS(block, "text", "i"); };
+    // i { PARSE_ATTR("text"); PASS(block, "text", "i"); };
     del { PASS(block, "text", "del"); };
     del_phrase { PASS(block, "text", "del_phrase"); };
     ins { PARSE_ATTR("text"); PASS(block, "text", "ins"); };
@@ -134,7 +134,7 @@
     quote1 { PASS(block, "text", "quote1"); };
     quote2 { PASS(block, "text", "quote2"); };
     multi_paragraph_quote { PASS(block, "text", "multi_paragraph_quote"); };
-    
+
     ellipsis { INLINE(block, "ellipsis"); };
     emdash { INLINE(block, "emdash"); };
     endash { INLINE(block, "endash"); };
@@ -147,22 +147,23 @@
     copyright { INLINE(block, "copyright"); };
     footno { PASS(block, "text", "footno"); };
     entity { INLINE(block, "entity"); };
-    
+
     script_tag { INLINE(block, "inline_html"); };
     start_tag { INLINE(block, "inline_html"); };
     end_tag { INLINE(block, "inline_html"); };
     empty_tag { INLINE(block, "inline_html"); };
     html_comment { INLINE(block, "inline_html"); };
     html_break { INLINE(block, "inline_html"); };
-    
+
     redcloth_version { INLINE(block, "inline_redcloth_version"); };
-    
+
     other_phrase => esc;
     PUNCT => esc;
     space => esc;
-    
+
     EOF;
-    
+
   *|;
 
 }%%;
+
